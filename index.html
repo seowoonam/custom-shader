@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Halftone Shader (Custom Shape)</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: #111;
+            color: #ddd;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        #app {
+            position: fixed;
+            inset: 0;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud {
+            position: fixed;
+            left: 12px;
+            top: 12px;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+        }
+
+        .hud input[type="file"] {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        .btn {
+            background: #222;
+            color: #ddd;
+            border: 1px solid #333;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn:hover {
+            background: #2a2a2a;
+        }
+
+        .credits {
+            position: fixed;
+            right: 12px;
+            bottom: 10px;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .gui-wrap {
+            position: fixed;
+            right: 12px;
+            top: 12px;
+            z-index: 20;
+        }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/lil-gui@0.19/dist/lil-gui.umd.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <canvas id="glcanvas"></canvas>
+        <div class="hud">
+            <button id="btn-shape" class="btn">Load Shape SVG</button>
+            <input id="file-shape" type="file" accept="image/svg+xml,image/png" />
+            <button id="btn-image" class="btn">Load Source Image/SVG</button>
+            <input id="file-image" type="file" accept="image/*,image/svg+xml" />
+            <button id="btn-save" class="btn">Save PNG</button>
+        </div>
+        <div class="gui-wrap" id="gui"></div>
+        <div class="credits">Halftone Shader • Custom Shape • lil-gui</div>
+    </div>
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>

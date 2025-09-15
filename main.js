@@ -47,6 +47,8 @@ uniform int u_scaleSteps;       // quantize scale into steps (>1 enables)
 uniform bool u_pixelateEnable;  // quantize shape UVs at small scales
 uniform float u_pixelBlocksMin; // few blocks at small scale (big pixels)
 uniform float u_pixelBlocksMax; // many blocks at large scale (fine)
+uniform bool u_ditherEnable;    // apply dithering to scale
+uniform float u_ditherStrength; // 0..1
 
 float luminance(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
@@ -107,6 +109,11 @@ void main() {
       float bMixed = mix(1.0, baseB, srcA);
       if (u_invert) bMixed = 1.0 - bMixed;
       float t = pow(1.0 - bMixed, max(0.001, u_curve));
+      if (u_ditherEnable) {
+        vec2 h = fract(cellIndex * vec2(0.1234, 0.3456));
+        float n = fract(sin(dot(h, vec2(12.9898, 78.233))) * 43758.5453);
+        t = clamp(t + (n - 0.5) * u_ditherStrength, 0.0, 1.0);
+      }
       scale = mix(u_minScale, u_maxScale, t) * edgeFactor;
     } else {
       vec2 p = uv * 2.0 - 1.0;
@@ -114,6 +121,11 @@ void main() {
       float bf = clamp(1.0 - r, 0.0, 1.0);
       if (u_invert) bf = 1.0 - bf;
       float t = pow(1.0 - bf, max(0.001, u_curve));
+      if (u_ditherEnable) {
+        vec2 h = fract(cellIndex * vec2(0.1234, 0.3456));
+        float n = fract(sin(dot(h, vec2(12.9898, 78.233))) * 43758.5453);
+        t = clamp(t + (n - 0.5) * u_ditherStrength, 0.0, 1.0);
+      }
       scale = mix(u_minScale, u_maxScale, t);
       srcA = 1.0;
     }
@@ -283,6 +295,8 @@ const loc = {
   u_pixelateEnable: gl.getUniformLocation(program, 'u_pixelateEnable'),
   u_pixelBlocksMin: gl.getUniformLocation(program, 'u_pixelBlocksMin'),
   u_pixelBlocksMax: gl.getUniformLocation(program, 'u_pixelBlocksMax'),
+  u_ditherEnable: gl.getUniformLocation(program, 'u_ditherEnable'),
+  u_ditherStrength: gl.getUniformLocation(program, 'u_ditherStrength'),
 };
 
 // Textures
@@ -374,6 +388,8 @@ const settings = {
   pixelateEnable: true,
   pixelBlocksMin: 3,
   pixelBlocksMax: 12,
+  ditherEnable: false,
+  ditherStrength: 0.2,
 };
 
 // GUI
@@ -400,6 +416,8 @@ gui.add(settings, 'scaleSteps', 1, 12, 1).name('Scale Steps');
 gui.add(settings, 'pixelateEnable').name('Pixelate Interim');
 gui.add(settings, 'pixelBlocksMin', 1, 16, 1).name('Pixel Blocks Min');
 gui.add(settings, 'pixelBlocksMax', 2, 32, 1).name('Pixel Blocks Max');
+gui.add(settings, 'ditherEnable').name('Dither Enable');
+gui.add(settings, 'ditherStrength', 0.0, 1.0, 0.01).name('Dither Strength');
 
 // File inputs
 const fileShape = document.getElementById('file-shape');
@@ -507,6 +525,8 @@ function render() {
   gl.uniform1i(loc.u_pixelateEnable, settings.pixelateEnable ? 1 : 0);
   gl.uniform1f(loc.u_pixelBlocksMin, settings.pixelBlocksMin);
   gl.uniform1f(loc.u_pixelBlocksMax, Math.max(settings.pixelBlocksMin, settings.pixelBlocksMax));
+  gl.uniform1i(loc.u_ditherEnable, settings.ditherEnable ? 1 : 0);
+  gl.uniform1f(loc.u_ditherStrength, settings.ditherStrength);
 
   const paper = hexToRgb(settings.paper);
   const ink = hexToRgb(settings.ink);
